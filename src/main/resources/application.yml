@@ -1,13 +1,13 @@
-person:
+person: 
   lastName: zhangsan
   age: 18
   birth: 2016/12/12
-  maps:
+  maps: 
    k1: v1
    k2: 11
-  lists:
+  lists: 
    - dog
    - cat
-  dog:
+  dog: 
    name: dog1
    age: 1
