@@ -3,8 +3,10 @@ package com.zj.domainmodel;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * 将配置文件中配置的每个属性值，银蛇到这个组件中
@@ -18,15 +20,31 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties(prefix = "person")
+@Validated
 public class Person {
 
+	/**
+	 * 等同于
+	 * <bean class="Person">
+	 *  <property name="lastName" value="张三" ${key}从环境变量或配置文件获取值/#{Spring表达式}></property>
+	 * </bean>
+	 * 
+	 * 从application.properties获取值
+	 */
+	//@Value("${person.lastName}")
+	
+	//lastName必须符合邮箱格式
+	//@Email
 	private String lastName;
 
+	//@Value("#{11*2}")
 	private Integer age;
 
 	private Map<String, Object> maps;
 
 	private List<Object> lists;
+	
+	private Dog dog;
 
 	public String getLastName() {
 		return lastName;
@@ -68,7 +86,7 @@ public class Person {
 		this.dog = dog;
 	}
 
-	private Dog dog;
+	
 
 	@Override
 	public String toString() {
