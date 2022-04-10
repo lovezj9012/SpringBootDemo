@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
@@ -16,9 +17,12 @@ import org.springframework.validation.annotation.Validated;
  * @Component只有这个组件是容器中的组件，才能使用容器提供的@ConfigurationProperties
  * 
  * 单元测试想要获取属性值，不能使用@Data注解
+ * 
+ * @PropertySource加载指定配置文件
  */
 
 @Component
+@PropertySource(value = {"classpath:person.properties"})
 @ConfigurationProperties(prefix = "person")
 @Validated
 public class Person {
