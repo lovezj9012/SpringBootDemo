@@ -150,7 +150,7 @@ person.dog.name=${person.hello:helloworld}_dog2
 person.dog.age=2
 ```
 
-####  5 Profile
+####  5 、Profile
 
 ![](D:\workspace2020\SpringBootDemo\picture\4.jpg)
 
@@ -159,6 +159,25 @@ person.dog.age=2
 在主文件编写的时候，文件名可以是application-{profile}.properties或者yml；默认使用application.properties或者yml
 
 ##### 2、yml支持多文档块方式
+
+```yaml
+spring:
+  profiles:
+    active: dev
+   
+---
+server:
+  port: 8084
+spring:
+  profiles: dev
+  
+  
+---
+server:
+  port: 8085
+spring:
+  profiles: prod  #指定属于哪个环境
+```
 
 
 
@@ -174,11 +193,63 @@ person.dog.age=2
 
 ​        java -jar jar包名称 --spring.profiles.active=dev
 
+
+
 ##### 3、虚拟机参数
 
 ​      -Dspring.profiles.active=dev
 
+#### 6、 配置文件加载位置
+
+![](D:\workspace2020\SpringBootDemo\picture\5.jpg)
 
 
 
+文件加载顺序
+
+- -file:/config/(项目根目录下的config)>file:./(项目根目录)>-classpath:/config/>classpath:/
+
+我们还可以通过spring.config.location来改变默认位置
+
+项目打包好后，我们可以使用命令行参数形式，启动项目来指定配置文件的新位置；指定配置文件和默认加载的这些配置文件共同起作用，形成互补配置
+
+#### 7、外部配置加载顺序
+
+![](D:\workspace2020\SpringBootDemo\picture\6.jpg)
+
+server.context-path=boot设置后访问路径需要多加/boot
+
+例如没有加这个配置访问路径是localhost:8080/hello
+
+加了后访问路径是localhost:8080/boot/hello
+
+##### 1.命令行参数
+
+java -jar jar包名 --server.port=8082 --server.context-path=boot
+
+多个配置用空格分开;--配置项=值
+
+##### 2.来自java：comp/envDe JNDI属性
+
+##### 3.java系统属性（System.getProperties()）
+
+##### 4.操作系统环境变量
+
+##### 5.RandomValuePropertySource配置的random.*属性值
+
+有jar包外向jar包内进行寻找；优先加载带profiel
+
+##### 6.jar包外部的application-{profile}.properties或application.yml(带spring.profile)配置文件
+
+##### 7.jar包内部的application-{profile}.properties或application.yml(带spring.profile)配置文件
+
+再来加载不带profile
+
+##### 8.jar包外部的application.properties或application.yml(不带spring.profile)配置文件
+
+##### 9.jar包内部的application.properties或application.yml(不带spring.profile)配置文件
+
+##### 10.@Configuration注解类上的@PropertySource
+
+##### 11.通过SpringApplication.setDefaultProperties指定的默认属性
 
