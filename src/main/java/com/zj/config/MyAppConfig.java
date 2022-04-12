@@ -10,7 +10,8 @@ import com.zj.service.HelloService;
  *
  *                在配置文件中相当于<bean></bean>标签添加组件
  */
-@Configuration
+
+//@Configuration
 public class MyAppConfig {
 
 	/**
