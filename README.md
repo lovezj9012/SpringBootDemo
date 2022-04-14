@@ -259,7 +259,7 @@ java -jar jar包名 --server.port=8082 --server.context-path=boot
 
 [配置文件能配置的属性参照](https://docs.spring.io/spring-boot/docs/1.5.10.RELEASE/reference/htmlsingle/#appendix)
 
-自动配置原理：
+##### 1、自动配置原理：
 
 1、SpringBoot启动的时候加载主配置类，开启了自动配置功能@EnableAutoConfiguration
 
@@ -278,6 +278,8 @@ SpringFactoriesLoader.loadFactoryNames(）
 ```
 
 将类路径下  META-INF/spring.factories里面配置的所有EnableAutoConfiguration的值加入到容器中
+
+**spring-boot-autoconfigure-2.6.6.jar中META-INF/spring.factories下的自动配置**
 
 ```properties
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
@@ -437,7 +439,7 @@ public class HttpEncodingAutoConfiguration {
 		this.properties = properties.getServlet().getEncoding();
 	}
     @Bean //给容器中添加一个组件，这个组件的某些值需要从properties中获取
-	@ConditionalOnMissingBean
+	@ConditionalOnMissingBean //判断容器中没有这个组件
 	public CharacterEncodingFilter characterEncodingFilter() {
 		CharacterEncodingFilter filter = new OrderedCharacterEncodingFilter();
 		filter.setEncoding(this.properties.getCharset().name());
@@ -468,3 +470,133 @@ public class ServerProperties {
 3、再来看这个自动配置类中到底配置了哪些组件；（只要我们要用的组件有，我们就不需要再来配置了）
 
 4、给容器中自动类添加组件，会从properties类中获取某些属性，我们就可以配置文件中指定这些属性的值
+
+##### 2、细节
+
+###### 1、@Conditional派生注解（Srping注解版原生的@Conditional作用）
+
+作用：必须是@Conditional指定条件成立，才给容器添加组件，配置类里所有的内容才生效。
+
+![](E:\Java\workspace\SpringBootDemo\picture\7.jpg)
+
+**自动配置类必须在满足一定条件下才能生效**
+
+怎么判断哪些自动配置类是否生效
+
+可以在properties/yaml配置文件中设置debug=true开始debug模式，让控制台输出自动配置报告
+
+#### 二、日志
+
+#### 1、日志框架
+
+![image-20220413084627356](E:\Java\workspace\SpringBootDemo\picture\8.jpg)
+
+SringBoot：底层是Spring框架，Spring框架默认使用JCL。
+
+**SpringBoot选用的是SLF4j和Logback**
+
+#### 2、SLF4j的使用
+
+##### 1.如何在系统上使用SLF4j
+
+以后开发的时候，日志记录方法调用，不应该直接调用日志实现类，而是直接调用日志抽象类里的方法
+
+在工程中导入slf4j的jar包和logback的jar包
+
+```java
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class HelloWorld {
+  public static void main(String[] args) {
+    Logger logger = LoggerFactory.getLogger(HelloWorld.class);
+    logger.info("Hello World");
+  }
+}
+```
+
+每一个日志实现框架都有自己的配置文件，使用slf4j以后，配置文件还是做成日志实现框架的配置文件
+
+##### 2.遗留问题
+
+a(slf4j+logback):Spring(commons -logging) Hibernate(Jboss-logging) MyBatis xxxxx
+
+统一日志记录，即使是别的框架和我一起统一使用slf4j进行输出
+
+![](E:\Java\workspace\SpringBootDemo\picture\9.jpg)
+
+**如何让系统中所有的日志都统一到slf4j**
+
+1.将系统中的其他日志框架先排除出去
+
+2.用中间包来替换原来的日志框架
+
+3.导入slf4j其他的实现
+
+#### 3、SpringBoot日志关系
+
+```xml
+ <dependency>
+	  <groupId>org.springframework.boot</groupId>
+	  <artifactId>spring-boot-starter</artifactId>
+	</dependency>
+```
+
+SpringBoot使用它来做日志功能
+
+```xml
+ <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-logging</artifactId>
+ </dependency>
+```
+
+1.SpringBoot底层也是使用slf4j+logback的方式进行日志记录
+
+2.SpringBoot也把其他日志都替换成slf4j
+
+3.中间替换包
+
+![image-20220413134209833](E:\Java\workspace\SpringBootDemo\picture\11.jpg)
+
+4.如果引入了其他框架？一定要移除这个框架的默认的日志依赖移除掉
+
+Spring框架用的是commons-logging
+
+![](E:\Java\workspace\SpringBootDemo\picture\10.jpg)
+
+==SpringBoot能自动适配所有的日志，而底层使用slf4j+logback方式记录日志，引入其他框架的时候，只需将这个框架依赖的日志框架排除掉==
+
+#### 4、日志使用
+
+##### 1、默认配置
+
+SpringBoot默认帮我们配置好了日志
+
+![image-20220413140057247](E:\Java\workspace\SpringBootDemo\picture\12.jpg)
+
+![image-20220413144918544](E:\Java\workspace\SpringBootDemo\picture\13.jpg)
+
+##### 2、指定配置
+
+给类路径下放上每个日志框架自己的配置文件即可；SpringBoot就不使用它默认的配置了
+
+![image-20220413171452762](E:\Java\workspace\SpringBootDemo\picture\14.jpg)
+
+logback.xml：直接会被框架识别
+
+logback-spring.xml：日志框架就不直接加载日志的配置项，由SpringBoot解析日志配置，可以使用SpringBoot的高级Profile功能
+
+```xml
+<springProfile name="staging">
+	<!-- configuration to be enabled when the "staging" profile is active --> 可以指定某段配置只在某个环境下生效
+</springProfile>
+```
+
+否则
+
+![image-20220413172206930](E:\Java\workspace\SpringBootDemo\picture\15.jpg)
+
+#### 5、切换日志框架
+
+可以按照slf4j的日志适配图，进行相关切换
