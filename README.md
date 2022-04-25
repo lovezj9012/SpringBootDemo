@@ -600,3 +600,139 @@ logback-spring.xml：日志框架就不直接加载日志的配置项，由Sprin
 #### 5、切换日志框架
 
 可以按照slf4j的日志适配图，进行相关切换
+
+#### 三、Web开发
+
+##### 1、使用SpringBoot
+
+**1、创建SpringBoot应用，选中需要的模块**
+
+**2、SpringBoot已经默认将这些场景配置好了，只需在配置文件中配置少量配置就可以运行起来**
+
+**3、编写业务代码**
+
+```
+xxxxAutoConfiguration 给容器中自动配置组件
+xxxxproperties 配置类封装配置文件内容
+```
+
+##### 2、SpringBoot对静态资源的映射规则
+
+```java
+@ConfigurationProperties("spring.web")
+public class WebProperties {
+ //可以设置和资源有关的配置；比如缓存时间
+```
+
+
+
+```java
+public void addResourceHandlers(ResourceHandlerRegistry registry) {
+			if (!this.resourceProperties.isAddMappings()) {
+				logger.debug("Default resource handling disabled");
+				return;
+			}
+			addResourceHandler(registry, "/webjars/**", "classpath:/META-INF/resources/webjars/");
+			addResourceHandler(registry, this.mvcProperties.getStaticPathPattern(), (registration) -> {
+				registration.addResourceLocations(this.resourceProperties.getStaticLocations());
+				if (this.servletContext != null) {
+					ServletContextResource resource = new ServletContextResource(this.servletContext, SERVLET_LOCATION);
+					registration.addResourceLocations(resource);
+				}
+			});
+		}
+		//配置欢迎页映射
+		@Bean
+		public WelcomePageHandlerMapping welcomePageHandlerMapping(ApplicationContext applicationContext,
+				FormattingConversionService mvcConversionService, ResourceUrlProvider mvcResourceUrlProvider) {
+			WelcomePageHandlerMapping welcomePageHandlerMapping = new WelcomePageHandlerMapping(
+					new TemplateAvailabilityProviders(applicationContext), applicationContext, getWelcomePage(),
+					this.mvcProperties.getStaticPathPattern());
+			welcomePageHandlerMapping.setInterceptors(getInterceptors(mvcConversionService, mvcResourceUrlProvider));
+			welcomePageHandlerMapping.setCorsConfigurations(getCorsConfigurations());
+			return welcomePageHandlerMapping;
+		}
+```
+
+1、/webjars/**都去classpath:/META-INF/resources/webjars/找资源
+
+webjars:以jar包方式引入静态资源；
+
+参考 https://www.webjars.org/
+
+引入jquery
+
+```xml
+<dependency>
+    <groupId>org.webjars.npm</groupId>
+    <artifactId>jquery</artifactId>
+    <version>3.3.1</version>
+</dependency>
+```
+
+2、“/”访问当前项目任何资源（静态资源文件夹）
+
+```java
+"classpath:/META-INF/resources/",
+"classpath:/resources/",
+"classpath:/static/",
+"classpath:/public/",
+"/":当前项目的根路径
+```
+
+localhost:/abc 找静态资源文件夹里的abc
+
+3、欢迎页，静态资源文件夹下的所有index.html页面，被"/**"映射
+
+localhost:8080/ 找index页面
+
+4、所有的**/favicon.ico都是在静态资源文件下找
+
+##### 3、模板引擎
+
+JSP、Velocity、Freemarker、thymeleaf
+
+SpringBoot推荐thymeleaf
+
+###### 1、引入thymeleaf
+
+```xml
+<dependency>
+     <groupId>org.springframework.boot</groupId>
+     <artifactId>spring-boot-starter-thymeleaf</artifactId>
+</dependency>
+切换thymeleaf版本
+<properties>
+    <thymeleaf.version>3.0.9.RELEASE</thymeleaf.version>
+    <!-- 布局功能的支持程序 thymeleaf3主程序对应 layout2以上版本 -->
+    <!-- thymeleaf2 对应 layout1 -->
+    <thymeleaf-layout-dialect.version>2.2.2</thymeleaf-layout-dialect.version>
+</properties>
+```
+
+###### 2、Thymeleaf使用和语法
+
+```java
+@ConfigurationProperties(prefix = "spring.thymeleaf")
+public class ThymeleafProperties {
+
+	private static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
+
+	public static final String DEFAULT_PREFIX = "classpath:/templates/";
+
+	public static final String DEFAULT_SUFFIX = ".html";
+    //只要把html页面放在"classpath:/templates/"下，thymeleaf就可以自动渲染
+```
+
+使用：
+
+1、导入thymeleaf的名称空间
+
+
+
+
+
+
+
+
+
