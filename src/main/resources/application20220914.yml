@@ -5,7 +5,7 @@
 #logging.path=/spring/log
 logging:
   #path: /spring/log
-  file: springboot.log
+  #file: springboot.log
 
 spring:
   profiles:

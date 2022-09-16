@@ -728,7 +728,69 @@ public class ThymeleafProperties {
 
 1、导入thymeleaf的名称空间
 
+##### 4、全面接管SpringMVC
 
+SpringBoot对SpringMVC自动配置不需要了，所有都是自己配置，所有的SpringMVC的自动配置自动失效
+
+**我们需要在配置类中添加@EnableWebMvc**
+
+```java
+//使用WebMvcConfigurerAdapter来扩展SpringMvc功能
+@EnableWebMvc
+@Configuration
+public class MyMvcConfig extends WebMvcConfigurerAdapter {
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+//        super.addViewControllers(registry);
+        //浏览器发送 /hello 请求来到success页面
+        registry.addViewController("/hello").setViewName("success");
+    }
+}
+```
+
+原理：
+
+ 为什么导入@EnableWebMvc自动配置会失效
+
+a、EnableWebMvc的核心
+
+```java
+@Import(DelegatingWebMvcConfiguration.class)
+public @interface EnableWebMvc 
+```
+
+b、DelegatingWebMvcConfiguration
+
+```java
+@Configuration(proxyBeanMethods = false)
+public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport
+```
+
+c、WebMvcAutoConfiguration
+
+```java
+@Configuration(proxyBeanMethods = false)
+@ConditionalOnWebApplication(type = Type.SERVLET)
+@ConditionalOnClass({ Servlet.class, DispatcherServlet.class, WebMvcConfigurer.class })
+//容器中没有这个组件的时候，这个自动配置类才生效
+@ConditionalOnMissingBean(WebMvcConfigurationSupport.class)
+@AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE + 10)
+@AutoConfigureAfter({ DispatcherServletAutoConfiguration.class, TaskExecutionAutoConfiguration.class,
+		ValidationAutoConfiguration.class })
+public class WebMvcAutoConfiguration {
+```
+
+d、EnableWebMvc将WebMvcConfigurationSupport组件导入进来
+
+e、导入的WebMvcConfigurationSupport只是SpringMVC最基本的功能
+
+##### 5.如何修改SpringBoot的默认配置
+
+ 模式：
+
+​	a、SpringBoot在自动配置很多组件的时候，先看容器中有没有用户自己配置的（@Bean、@Component)如果有就用用户配置的，没有，则自动配置，如果有些组件可以有多个（ViewRsolver）将用户配置的和自己默认的组合起来
+
+​	b、在SpringBoot中会有非常多的xxxConfigurer 帮助我们扩展配置
 
 
 
