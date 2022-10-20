@@ -89,8 +89,9 @@
 									<td th:text="${emp.department.departmentName}"></td>
 									<td th:text="${#dates.format(emp.birth,'yyyy-MM-dd HH:mm:ss')}"></td>
 									<td>
-										<button class="btn btn-sm btn-primary">编辑</button>
-										<button class="btn btn-sm btn-danger">删除</button>
+										<a class="btn btn-sm btn-primary" th:href="@{/emp/}+${emp.id}">编辑</a>
+										<button th:attr="delUrl=@{/emp/}+${emp.id}" class="btn btn-sm btn-danger deleteBtn">删除</button>
+
 									</td>
 								</tr>
 
@@ -98,8 +99,12 @@
 						</table>
 					</div>
 				</main>
+				<form id="delEmpForm" method="post">
+					<input type="hidden" name="_method" value="DELETE">
+				</form>
 			</div>
 		</div>
+
 
 		<!-- Bootstrap core JavaScript
     ================================================== -->
@@ -108,41 +113,13 @@
 		<script type="text/javascript" src="asserts/js/popper.min.js"></script>
 		<script type="text/javascript" src="asserts/js/bootstrap.min.js" th:src="@{/webjars/bootstrap/5.2.1/dist/js/bootstrap.js}"></script>
 
-		<!-- Icons -->
-		<script type="text/javascript" src="asserts/js/feather.min.js"></script>
-		<script>
-			feather.replace()
-		</script>
 
-		<!-- Graphs -->
-		<script type="text/javascript" src="asserts/js/Chart.min.js"></script>
-		<script>
-			var ctx = document.getElementById("myChart");
-			var myChart = new Chart(ctx, {
-				type: 'line',
-				data: {
-					labels: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-					datasets: [{
-						data: [15339, 21345, 18483, 24003, 23489, 24092, 12034],
-						lineTension: 0,
-						backgroundColor: 'transparent',
-						borderColor: '#007bff',
-						borderWidth: 4,
-						pointBackgroundColor: '#007bff'
-					}]
-				},
-				options: {
-					scales: {
-						yAxes: [{
-							ticks: {
-								beginAtZero: false
-							}
-						}]
-					},
-					legend: {
-						display: false,
-					}
-				}
+
+		<script type="text/javascript">
+			$(".deleteBtn").click(function (){
+				console.log($(this).attr("delUrl"));
+				$("#delEmpForm").attr("action",$(this).attr("delUrl")).submit();
+				return false;
 			});
 		</script>
 

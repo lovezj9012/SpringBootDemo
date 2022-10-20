@@ -27,12 +27,23 @@ public class EmployeeDao {
     private static  Integer initId =1006;
 
     public void save(Employee employee){
-        if(employee.getId()==null){
+        if (employee.getId() == null) {
             employee.setId(initId++);
         }
+        Department department = departmentDao.getDepartment(employee.getDepartment().getId());
+        employee.setDepartment(department);
+        employees.put(employee.getId(), employee);
     }
 
-    public Collection<Employee> getAll(){
+    public Collection<Employee> getAll() {
         return employees.values();
+    }
+
+    public Employee getEmployee(Integer id) {
+        return employees.get(id);
+    }
+
+    public Employee deleteEmp(Integer id){
+        return employees.remove(id);
     }
 }
